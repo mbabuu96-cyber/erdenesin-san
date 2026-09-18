@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Зээлийн дэвтэр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-bg: #0E1626;
+    --color-surface: #16213A;
+    --color-surface-2: #1C2A46;
+    --color-border: #2A3651;
+    --color-text: #EDE8DC;
+    --color-text-dim: #9AA5BD;
+    --color-accent: #C9A227;
+    --color-accent-ink: #0E1626;
+    --color-good: #6FA890;
+    --color-good-bg: rgba(111,168,144,0.14);
+    --color-danger: #D08A7D;
+    --color-danger-bg: rgba(208,138,125,0.12);
+    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --color-bg: #F5F2E7;
+      --color-surface: #FFFFFF;
+      --color-surface-2: #FBF9F2;
+      --color-border: #DDD6C2;
+      --color-text: #1B2333;
+      --color-text-dim: #6B7280;
+      --color-accent: #9C7318;
+      --color-accent-ink: #FFFFFF;
+      --color-good: #3F6F5C;
+      --color-good-bg: rgba(63,111,92,0.10);
+      --color-danger: #A8453C;
+      --color-danger-bg: rgba(168,69,60,0.09);
+    }
+  }
+  :root[data-theme="light"]{
+    --color-bg: #F5F2E7;
+    --color-surface: #FFFFFF;
+    --color-surface-2: #FBF9F2;
+    --color-border: #DDD6C2;
+    --color-text: #1B2333;
+    --color-text-dim: #6B7280;
+    --color-accent: #9C7318;
+    --color-accent-ink: #FFFFFF;
+    --color-good: #3F6F5C;
+    --color-good-bg: rgba(63,111,92,0.10);
+    --color-danger: #A8453C;
+    --color-danger-bg: rgba(168,69,60,0.09);
+  }
+  :root[data-theme="dark"]{
+    --color-bg: #0E1626;
+    --color-surface: #16213A;
+    --color-surface-2: #1C2A46;
+    --color-border: #2A3651;
+    --color-text: #EDE8DC;
+    --color-text-dim: #9AA5BD;
+    --color-accent: #C9A227;
+    --color-accent-ink: #0E1626;
+    --color-good: #6FA890;
+    --color-good-bg: rgba(111,168,144,0.14);
+    --color-danger: #D08A7D;
+    --color-danger-bg: rgba(208,138,125,0.12);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:28px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 20px;
+    flex-wrap:wrap;
+  }
+  header.top h1{
+    font-family: var(--font-display);
+    font-weight:600;
+    font-size: 1.9rem;
+    margin:0;
+    letter-spacing: -0.01em;
+  }
+  header.top .sub{
+    color: var(--color-text-dim);
+    font-size:0.92rem;
+    margin-top:4px;
+  }
+  .theme-btn{
+    background:none;
+    border:1px solid var(--color-border);
+    color:var(--color-text-dim);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:0.8rem;
+    cursor:pointer;
+    font-family: var(--font-body);
+  }
+  .theme-btn:hover{ color:var(--color-text); border-color: var(--color-accent); }
+
+  nav.tabs{
+    display:flex;
+    gap:4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  nav.tabs button{
+    background:none;
+    border:none;
+    color: var(--color-text-dim);
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    padding: 10px 4px;
+    margin-right: 28px;
+    cursor:pointer;
+    border-bottom: 2px solid transparent;
+    position:relative;
+    top:1px;
+  }
+  nav.tabs button.active{
+    color: var(--color-text);
+    border-bottom-color: var(--color-accent);
+  }
+  nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .card{
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 560px){ .grid{ grid-template-columns: 1fr; } }
+
+  label{
+    display:block;
+    font-size: 0.82rem;
+    color: var(--color-text-dim);
+    margin-bottom: 6px;
+  }
+  input, select{
+    width:100%;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.98rem;
+    font-family: var(--font-mono);
+  }
+  input::placeholder{ color: var(--color-text-dim); opacity:0.6; }
+
+  .field{ margin-bottom: 4px; }
+
+  .btn{
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+    border:none;
+    border-radius: 6px;
+    padding: 11px 20px;
+    font-size: 0.95rem;
+    font-weight:600;
+    cursor:pointer;
+    font-family: var(--font-body);
+  }
+  .btn:hover{ filter: brightness(1.08); }
+  .btn.secondary{
+    background:none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-weight:500;
+  }
+  .btn.danger{
+    background:none;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    font-weight:500;
+    padding: 6px 12px;
+    font-size:0.82rem;
+  }
+  .btn.small{
+    padding: 6px 12px;
+    font-size:0.82rem;
+  }
+
+  .results{
+    margin-top: 22px;
+    padding-top: 22px;
+    border-top: 1px dashed var(--color-border);
+    display:none;
+  }
+  .results.show{ display:block; }
+  .result-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .result-row:last-child{ border-bottom:none; }
+  .result-row .label{ color: var(--color-text-dim); font-size:0.9rem; }
+  .result-row .value{ font-family: var(--font-mono); font-size:1.05rem; font-weight:600; }
+  .result-row.hero .value{ font-size: 1.7rem; color: var(--color-accent); font-family: var(--font-display); font-weight:600; }
+
+  table{
+    width:100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+  }
+  th, td{
+    text-align:right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--color-border);
+    white-space:nowrap;
+  }
+  th:first-child, td:first-child{ text-align:left; }
+  thead th{
+    color: var(--color-text-dim);
+    font-weight:500;
+    font-family: var(--font-body);
+    font-size:0.78rem;
+  }
+  .table-scroll{
+    overflow-x:auto;
+    margin-top: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+  }
+  .table-scroll table{ min-width: 560px; }
+
+  details summary{
+    cursor:pointer;
+    color: var(--color-accent);
+    font-size:0.9rem;
+    margin-top:16px;
+    list-style:none;
+  }
+  details summary::-webkit-details-marker{ display:none; }
+  details summary:before{ content: "▸ "; }
+  details[open] summary:before{ content: "▾ "; }
+
+  /* Ledger (management) */
+  .ledger-summary{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:1px;
+    background: var(--color-border);
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom: 28px;
+  }
+  @media (max-width:560px){ .ledger-summary{ grid-template-columns:1fr; } }
+  .ledger-summary .stat{
+    background: var(--color-surface);
+    padding: 18px 20px;
+  }
+  .ledger-summary .stat .label{ font-size:0.78rem; color:var(--color-text-dim); margin-bottom:6px; }
+  .ledger-summary .stat .value{ font-family: var(--font-mono); font-size:1.3rem; font-weight:600; }
+
+  .borrower-list{ display:flex; flex-direction:column; gap:12px; }
+  .borrower{
+    background: var(--color-surface);
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    padding: 18px 20px;
+  }
+  .borrower-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .borrower-head .name{
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight:600;
+  }
+  .borrower-head .meta{
+    font-size:0.8rem;
+    color: var(--color-text-dim);
+    margin-top:2px;
+  }
+  .status-pill{
+    font-size:0.74rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .status-pill.active{ background: var(--color-good-bg); color: var(--color-good); }
+  .status-pill.done{ background: var(--color-border); color: var(--color-text-dim); }
+
+  .borrower-stats{
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:12px;
+    margin: 16px 0;
+  }
+  @media (max-width:640px){ .borrower-stats{ grid-template-columns: repeat(2,1fr); } }
+  .borrower-stats .item .label{ font-size:0.72rem; color:var(--color-text-dim); }
+  .borrower-stats .item .value{ font-family: var(--font-mono); font-size:0.98rem; font-weight:600; margin-top:2px; }
+
+  .progress-bar{
+    height:6px;
+    background: var(--color-surface-2);
+    border-radius:4px;
+    overflow:hidden;
+    margin: 6px 0 14px;
+  }
+  .progress-bar .fill{
+    height:100%;
+    background: var(--color-accent);
+  }
+
+  .borrower-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--color-text-dim);
+    border: 1px dashed var(--color-border);
+    border-radius: 10px;
+  }
+  .empty-state .big{
+    font-family: var(--font-display);
+    font-size:1.3rem;
+    color: var(--color-text);
+    margin-bottom:8px;
+  }
+
+  form#borrower-form{
+    background: var(--color-surface);
+    border:1px solid var(--color-border);
+    border-radius:10px;
+    padding:22px;
+    margin-bottom: 24px;
+    display:none;
+  }
+  form#borrower-form.show{ display:block; }
+  form#borrower-form h3{
+    font-family: var(--font-display);
+    font-weight:600;
+    margin:0 0 16px;
+    font-size:1.1rem;
+  }
+  .form-actions{ margin-top:16px; display:flex; gap:10px; }
+
+  .top-actions{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+
+  .alert-stack{ display:flex; flex-direction:column; gap:10px; margin-bottom: 20px; }
+  .alert-box{
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger);
+    color: var(--color-text);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.86rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .alert-box .alert-title{ font-weight:600; color: var(--color-danger); margin-bottom:2px; }
+  .alert-box button{
+    background:none; border:none; color: var(--color-text-dim);
+    cursor:pointer; font-size:0.9rem; line-height:1; padding:2px 4px;
+  }
+
+  .audit-log{
+    margin-top: 14px;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow:hidden;
+  }
+  .audit-row{
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.82rem;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    background: var(--color-surface);
+  }
+  .audit-row:last-child{ border-bottom:none; }
+  .audit-row .audit-what{ color: var(--color-text); }
+  .audit-row .audit-what b{ font-weight:600; }
+  .audit-row.warn .audit-what b{ color: var(--color-danger); }
+  .audit-row .audit-when{ color: var(--color-text-dim); white-space:nowrap; font-family: var(--font-mono); font-size:0.76rem; }
+  .audit-empty{ padding:16px; text-align:center; color:var(--color-text-dim); font-size:0.85rem; }
+
+  footer.note{
+    margin-top: 40px;
+    font-size: 0.78rem;
+    color: var(--color-text-dim);
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Зээлийн дэвтэр</h1>
+      <div class="sub">Тооцоолуур ба олгосон зээлийн бүртгэл</div>
+    </div>
+    <button class="theme-btn" id="theme-toggle" type="button">Өнгө солих</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="calc">Тооцоолуур</button>
+    <button class="tab-btn" data-tab="ledger">Зээлийн бүртгэл</button>
+  </nav>
+
+  <!-- ===== CALCULATOR PANEL ===== -->
+  <section class="panel active" id="panel-calc">
+    <div class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="c-principal">Зээлийн дүн (₮)</label>
+          <input type="number" id="c-principal" inputmode="decimal" placeholder="10 000 000" min="0">
+        </div>
+        <div class="field">
+          <label for="c-rate">Жилийн хүү (%)</label>
+          <input type="number" id="c-rate" inputmode="decimal" placeholder="18" min="0" step="0.1">
+        </div>
+        <div class="field">
+          <label for="c-term">Хугацаа (сараар)</label>
+          <input type="number" id="c-term" inputmode="numeric" placeholder="24" min="1" step="1">
+        </div>
+        <div class="field">
+          <label for="c-start">Эхлэх огноо</label>
+          <input type="date" id="c-start">
+        </div>
+      </div>
+      <div style="margin-top:18px;">
+        <button class="btn" id="calc-btn" type="button">Тооцоолох</button>
+      </div>
+
+      <div class="results" id="calc-results">
+        <div class="result-row hero">
+          <span class="label">Сар бүрийн төлбөр</span>
+          <span class="value" id="r-monthly">—</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Нийт төлөх дүн</span>
+          <span class="value" id="r-total">—</span>
+        </div>
+        <div class="result-row">
+          <span class="label">Нийт хүү</span>
+          <span class="value" id="r-interest">—</span>
+        </div>
+
+        <details id="schedule-details">
+          <summary>Төлбөрийн хуваарийг харах</summary>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>№</th>
+                  <th>Огноо</th>
+                  <th>Үндсэн төлбөр</th>
+                  <th>Хүү</th>
+                  <th>Нийт төлбөр</th>
+                  <th>Үлдэгдэл</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-body"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LEDGER PANEL ===== -->
+  <section class="panel" id="panel-ledger">
+
+    <div id="integrity-alerts" class="alert-stack"></div>
+
+    <div class="ledger-summary" id="ledger-summary">
+      <div class="stat">
+        <div class="label">Идэвхтэй зээлдэгч</div>
+        <div class="value" id="sum-active">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Олгосон нийт дүн</div>
+        <div class="value" id="sum-principal">0 ₮</div>
+      </div>
+      <div class="stat">
+        <div class="label">Хүлээгдэж буй үлдэгдэл</div>
+        <div class="value" id="sum-remaining">0 ₮</div>
+      </div>
+    </div>
+
+    <div class="top-actions" style="justify-content:space-between; align-items:center;">
+      <span id="storage-mode" style="font-size:0.78rem; color:var(--color-text-dim);"></span>
+      <button class="btn" id="show-form-btn" type="button">+ Зээлдэгч нэмэх</button>
+    </div>
+
+    <form id="borrower-form">
+      <h3>Шинэ зээлдэгч</h3>
+      <div class="grid">
+        <div class="field">
+          <label for="b-name">Нэр</label>
+          <input type="text" id="b-name" placeholder="Бат-Эрдэнэ" required>
+        </div>
+        <div class="field">
+          <label for="b-phone">Утас (заавал биш)</label>
+          <input type="text" id="b-phone" placeholder="9911 2233">
+        </div>
+        <div class="field">
+          <label for="b-principal">Зээлийн дүн (₮)</label>
+          <input type="number" id="b-principal" min="0" required>
+        </div>
+        <div class="field">
+          <label for="b-rate">Жилийн хүү (%)</label>
+          <input type="number" id="b-rate" min="0" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="b-term">Хугацаа (сараар)</label>
+          <input type="number" id="b-term" min="1" step="1" required>
+        </div>
+        <div class="field">
+          <label for="b-start">Эхлэх огноо</label>
+          <input type="date" id="b-start" required>
+        </div>
+      </div>
+      <p style="font-size:0.78rem; color:var(--color-text-dim); margin: 4px 0 0;">Хадгалсны дараа Нэр, Дүн, Хүү, Хугацаа, Эхлэх огноог засах боломжгүй болно — эдгээр нь түгжигдэнэ. Зөвхөн төлбөрийн явц (тэмдэглэх) болон устгах үйлдэл хийгдэнэ, бүгд түүхэнд бүртгэгдэнэ.</p>
+      <div class="form-actions">
+        <button type="submit" class="btn">Хадгалах</button>
+        <button type="button" class="btn secondary" id="cancel-form-btn">Цуцлах</button>
+      </div>
+    </form>
+
+    <div class="borrower-list" id="borrower-list"></div>
+
+    <div class="empty-state" id="empty-state" style="display:none;">
+      <div class="big">Бүртгэл хоосон байна</div>
+      <div>Эхний зээлдэгчээ нэмээд эхэлье.</div>
+    </div>
+
+    <details id="audit-details" style="margin-top:28px;">
+      <summary>Өөрчлөлтийн түүх (аудит)</summary>
+      <div class="audit-log" id="audit-log-list"></div>
+    </details>
+
+  </section>
+
+  <footer class="note">
+    Хэрэв хамтын сан ажиллаж байвал зээлдэгчийн бүртгэл байгууллагын гишүүдэд хуваалцагдана; ажиллахгүй бол мэдээлэл зөвхөн энэ хөтчид хадгалагдана. Тооцоолол нь тэнцүү төлбөртэй (аннуитет) схемээр бодогдоно. Зээлдэгч бүрийн үндсэн мэдээлэл (дүн, хүү, хугацаа) үүсгэсний дараа түгжигдэж, өөрчлөгдвөл систем автоматаар анхны утгыг сэргээж, доорх түүхэнд бүртгэнэ.
+  </footer>
+
+</div>
+
+<script>
+
+(function(){
+  "use strict";
+
+  // ---------- helpers ----------
+  function fmt(n){
+    n = Math.round(n);
+    return n.toLocaleString('mn-MN') + ' ₮';
+  }
+  function fmtNum(n){
+    return Math.round(n).toLocaleString('mn-MN');
+  }
+  function todayStr(){
+    var d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+  function addMonths(dateStr, n){
+    var d = new Date(dateStr + 'T00:00:00');
+    var day = d.getDate();
+    d.setMonth(d.getMonth() + n);
+    // handle month-length overflow
+    if(d.getDate() < day){ d.setDate(0); }
+    return d;
+  }
+  function fmtDate(d){
+    return d.toLocaleDateString('mn-MN', {year:'numeric', month:'2-digit', day:'2-digit'});
+  }
+
+  function amortize(principal, annualRatePct, termMonths, startDate){
+    var r = (annualRatePct/100)/12;
+    var n = termMonths;
+    var payment;
+    if(r === 0){
+      payment = principal / n;
+    } else {
+      payment = principal * r / (1 - Math.pow(1+r, -n));
+    }
+    var rows = [];
+    var balance = principal;
+    var totalInterest = 0;
+    for(var i=1;i<=n;i++){
+      var interest = balance * r;
+      var principalPart = payment - interest;
+      if(i === n){ principalPart = balance; payment = principalPart + interest; }
+      balance = Math.max(0, balance - principalPart);
+      totalInterest += interest;
+      rows.push({
+        period: i,
+        date: startDate ? fmtDate(addMonths(startDate, i)) : '',
+        principalPart: principalPart,
+        interest: interest,
+        payment: principalPart + interest,
+        balance: balance
+      });
+    }
+    var firstPayment = rows.length ? rows[0].payment : (r===0 ? principal/n : payment);
+    return {
+      monthly: (r===0 ? principal/n : principal * r / (1 - Math.pow(1+r,-n))),
+      rows: rows,
+      totalInterest: totalInterest,
+      totalPaid: principal + totalInterest
+    };
+  }
+
+  // ---------- tabs ----------
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- theme ----------
+  var themeBtn = document.getElementById('theme-toggle');
+  function currentTheme(){
+    return document.documentElement.getAttribute('data-theme');
+  }
+  themeBtn.addEventListener('click', function(){
+    var cur = currentTheme();
+    var next;
+    if(!cur){
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      next = prefersDark ? 'light' : 'dark';
+    } else {
+      next = cur === 'dark' ? 'light' : 'dark';
+    }
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('loan_app_theme', next); }catch(e){}
+  });
+  try{
+    var savedTheme = localStorage.getItem('loan_app_theme');
+    if(savedTheme){ document.documentElement.setAttribute('data-theme', savedTheme); }
+  }catch(e){}
+
+  // ---------- calculator ----------
+  document.getElementById('c-start').value = todayStr();
+
+  document.getElementById('calc-btn').addEventListener('click', function(){
+    var principal = parseFloat(document.getElementById('c-principal').value);
+    var rate = parseFloat(document.getElementById('c-rate').value);
+    var term = parseInt(document.getElementById('c-term').value, 10);
+    var start = document.getElementById('c-start').value;
+
+    if(!principal || principal <= 0 || isNaN(rate) || !term || term <= 0){
+      alert('Зээлийн дүн, хүү, хугацааг зөв бөглөнө үү.');
+      return;
+    }
+
+    var result = amortize(principal, rate, term, start);
+
+    document.getElementById('r-monthly').textContent = fmt(result.monthly);
+    document.getElementById('r-total').textContent = fmt(result.totalPaid);
+    document.getElementById('r-interest').textContent = fmt(result.totalInterest);
+
+    var tbody = document.getElementById('schedule-body');
+    tbody.innerHTML = '';
+    result.rows.forEach(function(row){
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + row.period + '</td>' +
+        '<td>' + row.date + '</td>' +
+        '<td>' + fmtNum(row.principalPart) + '</td>' +
+        '<td>' + fmtNum(row.interest) + '</td>' +
+        '<td>' + fmtNum(row.payment) + '</td>' +
+        '<td>' + fmtNum(row.balance) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('calc-results').classList.add('show');
+  });
+
+  // ---------- ledger (lending management) ----------
+  var STORAGE_KEY = 'loan_app_borrowers_v1';
+  var borrowers = [];
+  var dbCol = null;          // set when the shared database is available
+  var storageMode = 'local'; // 'db' | 'local'
+  var auditCol = null;
+  var auditLog = [];
+  var AUDIT_STORAGE_KEY = 'loan_app_audit_v1';
+  var LOCKED_FIELDS = ['name','phone','principal','rate','term','start'];
+  var FIELD_LABELS = { name:'Нэр', phone:'Утас', principal:'Зээлийн дүн', rate:'Хүү', term:'Хугацаа', start:'Эхлэх огноо' };
+  var pendingRestore = {};
+  var activeAlerts = [];
+
+  function loadBorrowersLocal(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      borrowers = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      borrowers = [];
+    }
+  }
+  function saveBorrowersLocal(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(borrowers));
+    }catch(e){
+      alert('Мэдээллийг хадгалахад алдаа гарлаа. Хөтчийн санах ой дүүрсэн байж магадгүй.');
+    }
+  }
+  function loadAuditLocal(){
+    try{
+      var raw = localStorage.getItem(AUDIT_STORAGE_KEY);
+      auditLog = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      auditLog = [];
+    }
+  }
+  function saveAuditLocal(){
+    try{
+      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(auditLog));
+    }catch(e){}
+  }
+
+  // ---- audit log: records every create / payment / delete / restore / tamper event ----
+  function addAuditEntry(entry){
+    entry.ts = entry.ts || new Date().toISOString();
+    if(storageMode === 'db' && auditCol){
+      auditCol.add(entry).catch(function(){ /* audit write is best-effort */ });
+    } else {
+      entry.id = 'l' + Date.now() + Math.floor(Math.random()*1000);
+      auditLog.unshift(entry);
+      if(auditLog.length > 200){ auditLog.length = 200; }
+      saveAuditLocal();
+      renderAuditLog();
+    }
+  }
+  function auditLabel(e){
+    var name = escapeHtml(e.borrowerName || '—');
+    switch(e.type){
+      case 'created':  return '<b>' + name + '</b> шинэ зээлдэгч бүртгэгдсэн (' + fmt(e.principal||0) + ')';
+      case 'payment':  return '<b>' + name + '</b> — төлбөр тэмдэглэгдсэн (' + e.from + ' → ' + e.to + ' сар)';
+      case 'deleted':  return '<b>' + name + '</b> — бүртгэл устгагдсан';
+      case 'restored': return '<b>' + name + '</b> — бүртгэл сэргээгдсэн';
+      case 'violation':return '<b>' + name + '</b> — зөвшөөрөгдөөгүй өөрчлөлт илэрч автоматаар сэргээгдсэн: ' + escapeHtml(e.detail || '');
+      default: return name + ' — ' + escapeHtml(e.type || '');
+    }
+  }
+  function renderAuditLog(){
+    var wrap = document.getElementById('audit-log-list');
+    if(!wrap) return;
+    if(!auditLog.length){
+      wrap.innerHTML = '<div class="audit-empty">Түүх хоосон байна.</div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    auditLog.forEach(function(e){
+      var row = document.createElement('div');
+      row.className = 'audit-row' + (e.type === 'violation' ? ' warn' : '');
+      var when = '';
+      try{ when = fmtDate(new Date(e.ts)); }catch(err){}
+      var restoreBtn = (e.type === 'deleted' && e.snapshot)
+        ? '<button type="button" class="btn secondary small restore-deleted" data-id="' + e.id + '" style="margin-left:8px;">Сэргээх</button>'
+        : '';
+      row.innerHTML = '<div class="audit-what">' + auditLabel(e) + restoreBtn + '</div><div class="audit-when">' + when + '</div>';
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll('.restore-deleted').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var entry = auditLog.find(function(x){ return x.id === btn.dataset.id; });
+        if(entry && entry.snapshot){ restoreFromSnapshot(entry.snapshot); }
+      });
+    });
+  }
+
+  // ---- tamper protection: compare live fields against the locked-at-creation copy ----
+  function findIntegrityViolations(rec){
+    if(!rec || !rec.locked) return null;
+    var diffs = [];
+    LOCKED_FIELDS.forEach(function(f){
+      if(String(rec[f]) !== String(rec.locked[f])){
+        diffs.push(FIELD_LABELS[f] + ': "' + rec[f] + '" → буцаав "' + rec.locked[f] + '"');
+      }
+    });
+    return diffs.length ? diffs : null;
+  }
+  function checkAndHealIntegrity(rec){
+    if(pendingRestore[rec.id]) return;
+    var violations = findIntegrityViolations(rec);
+    if(!violations) return;
+    pendingRestore[rec.id] = true;
+    var restorePatch = {};
+    LOCKED_FIELDS.forEach(function(f){ restorePatch[f] = rec.locked[f]; });
+    var label = rec.locked.name || rec.name || '—';
+    pushAlert('"' + label + '" зээлдэгчийн бүртгэлд зөвшөөрөгдөөгүй өөрчлөлт илэрлээ. Анхны утга руу автоматаар сэргээлээ.');
+    addAuditEntry({ type:'violation', borrowerId: rec.id, borrowerName: label, detail: violations.join(', ') });
+    updateBorrowerRecord(rec.id, restorePatch);
+    setTimeout(function(){ delete pendingRestore[rec.id]; }, 4000);
+  }
+
+  // ---- in-page alert banner ----
+  function pushAlert(text){
+    var id = 'a' + Date.now() + Math.random().toString(16).slice(2);
+    activeAlerts.push({ id: id, text: text });
+    renderAlerts();
+  }
+  function dismissAlert(id){
+    activeAlerts = activeAlerts.filter(function(a){ return a.id !== id; });
+    renderAlerts();
+  }
+  function renderAlerts(){
+    var wrap = document.getElementById('integrity-alerts');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    activeAlerts.forEach(function(a){
+      var div = document.createElement('div');
+      div.className = 'alert-box';
+      div.innerHTML =
+        '<div><div class="alert-title">Аюулгүй байдлын анхааруулга</div><div>' + escapeHtml(a.text) + '</div></div>' +
+        '<button type="button" class="dismiss-alert" data-id="' + a.id + '">✕</button>';
+      wrap.appendChild(div);
+    });
+    wrap.querySelectorAll('.dismiss-alert').forEach(function(btn){
+      btn.addEventListener('click', function(){ dismissAlert(btn.dataset.id); });
+    });
+  }
+
+  function addBorrowerRecord(input){
+    var locked = {};
+    LOCKED_FIELDS.forEach(function(f){ locked[f] = input[f]; });
+    var record = {
+      name: input.name, phone: input.phone || '',
+      principal: input.principal, rate: input.rate, term: input.term, start: input.start,
+      paidCount: 0,
+      createdAt: new Date().toISOString(),
+      locked: locked
+    };
+    if(storageMode === 'db' && dbCol){
+      dbCol.add(record).then(function(ref){
+        addAuditEntry({ type:'created', borrowerId: ref.id, borrowerName: record.name, principal: record.principal });
+      }).catch(function(){
+        alert('Санд бичихэд алдаа гарлаа. Дахин оролдоно уу.');
+      });
+    } else {
+      record.id = 'b' + Date.now() + Math.floor(Math.random()*1000);
+      borrowers.push(record);
+      saveBorrowersLocal();
+      addAuditEntry({ type:'created', borrowerId: record.id, borrowerName: record.name, principal: record.principal });
+      renderBorrowers();
+    }
+  }
+  function restoreFromSnapshot(snapshot){
+    var clone = JSON.parse(JSON.stringify(snapshot));
+    delete clone.id;
+    if(storageMode === 'db' && dbCol){
+      dbCol.add(clone).then(function(ref){
+        addAuditEntry({ type:'restored', borrowerId: ref.id, borrowerName: clone.name });
+      }).catch(function(){
+        alert('Сэргээхэд алдаа гарлаа.');
+      });
+    } else {
+      clone.id = 'b' + Date.now() + Math.floor(Math.random()*1000);
+      borrowers.push(clone);
+      saveBorrowersLocal();
+      addAuditEntry({ type:'restored', borrowerId: clone.id, borrowerName: clone.name });
+      renderBorrowers();
+    }
+  }
+  function updateBorrowerRecord(id, patch){
+    if(storageMode === 'db' && dbCol){
+      dbCol.doc(id).update(patch).catch(function(){
+        alert('Шинэчлэхэд алдаа гарлаа.');
+      });
+    } else {
+      var b = borrowers.find(function(x){ return x.id === id; });
+      if(b){
+        for(var k in patch){ b[k] = patch[k]; }
+        saveBorrowersLocal();
+        renderBorrowers();
+      }
+    }
+  }
+  function deleteBorrowerRecord(id){
+    var b = borrowers.find(function(x){ return x.id === id; });
+    var snapshot = b ? JSON.parse(JSON.stringify(b)) : null;
+    if(storageMode === 'db' && dbCol){
+      dbCol.doc(id).delete().then(function(){
+        addAuditEntry({ type:'deleted', borrowerId: id, borrowerName: (b && b.name) || '—', snapshot: snapshot });
+      }).catch(function(){
+        alert('Устгахад алдаа гарлаа.');
+      });
+    } else {
+      borrowers = borrowers.filter(function(x){ return x.id !== id; });
+      saveBorrowersLocal();
+      addAuditEntry({ type:'deleted', borrowerId: id, borrowerName: (b && b.name) || '—', snapshot: snapshot });
+      renderBorrowers();
+    }
+  }
+
+  function updateStorageBadge(){
+    var el = document.getElementById('storage-mode');
+    if(!el) return;
+    el.textContent = storageMode === 'db'
+      ? 'Хамтын сан — байгууллагын гишүүд хуваалцана · үндсэн мэдээлэл түгжигдсэн'
+      : 'Зөвхөн энэ хөтчид хадгалагдана · үндсэн мэдээлэл түгжигдсэн';
+  }
+
+  async function initStorage(){
+    var db = null;
+    try{
+      if(window.claude && typeof window.claude.use === 'function'){
+        db = await window.claude.use('db');
+      }
+    }catch(e){ db = null; }
+
+    if(db){
+      storageMode = 'db';
+      dbCol = db.collection('borrowers');
+      auditCol = db.collection('auditLog');
+
+      dbCol.onSnapshot(function(snap){
+        borrowers = snap.docs.map(function(d){
+          var data = d.data() || {};
+          data.id = d.id;
+          return data;
+        });
+        renderBorrowers();
+        borrowers.forEach(checkAndHealIntegrity);
+      }, function(err){
+        console.error('db onSnapshot error', err);
+      });
+
+      auditCol.limit(200).onSnapshot(function(snap){
+        auditLog = snap.docs.map(function(d){
+          var data = d.data() || {};
+          data.id = d.id;
+          return data;
+        }).sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
+        renderAuditLog();
+      }, function(err){
+        console.error('audit onSnapshot error', err);
+      });
+    } else {
+      storageMode = 'local';
+      loadBorrowersLocal();
+      loadAuditLocal();
+      renderBorrowers();
+      renderAuditLog();
+      borrowers.forEach(checkAndHealIntegrity);
+    }
+    updateStorageBadge();
+  }
+
+  var showFormBtn = document.getElementById('show-form-btn');
+  var form = document.getElementById('borrower-form');
+  var cancelFormBtn = document.getElementById('cancel-form-btn');
+
+  showFormBtn.addEventListener('click', function(){
+    form.classList.add('show');
+    document.getElementById('b-start').value = todayStr();
+    document.getElementById('b-name').focus();
+  });
+  cancelFormBtn.addEventListener('click', function(){
+    form.classList.remove('show');
+    form.reset();
+  });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('b-name').value.trim();
+    var phone = document.getElementById('b-phone').value.trim();
+    var principal = parseFloat(document.getElementById('b-principal').value);
+    var rate = parseFloat(document.getElementById('b-rate').value);
+    var term = parseInt(document.getElementById('b-term').value, 10);
+    var start = document.getElementById('b-start').value;
+
+    if(!name || !principal || principal<=0 || isNaN(rate) || !term || term<=0 || !start){
+      alert('Бүх талбарыг зөв бөглөнө үү.');
+      return;
+    }
+
+    addBorrowerRecord({
+      name: name,
+      phone: phone,
+      principal: principal,
+      rate: rate,
+      term: term,
+      start: start
+    });
+    form.reset();
+    form.classList.remove('show');
+  });
+
+  function renderBorrowers(){
+    var list = document.getElementById('borrower-list');
+    var empty = document.getElementById('empty-state');
+    list.innerHTML = '';
+
+    if(borrowers.length === 0){
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+    }
+
+    var activeCount = 0;
+    var totalPrincipal = 0;
+    var totalRemaining = 0;
+
+    borrowers.forEach(function(b){
+      var calc = amortize(b.principal, b.rate, b.term, b.start);
+      var paid = Math.min(b.paidCount, b.term);
+      var remaining = paid < b.term ? calc.rows[paid > 0 ? paid-1 : 0].balance : 0;
+      if(paid === 0){ remaining = b.principal; }
+      var isDone = paid >= b.term;
+
+      if(!isDone) activeCount++;
+      totalPrincipal += b.principal;
+      totalRemaining += remaining;
+
+      var pct = Math.round((paid / b.term) * 100);
+
+      var div = document.createElement('div');
+      div.className = 'borrower';
+      div.innerHTML =
+        '<div class="borrower-head">' +
+          '<div>' +
+            '<div class="name">' + escapeHtml(b.name) + '</div>' +
+            '<div class="meta">' + (b.phone ? escapeHtml(b.phone) + ' · ' : '') + fmtDate(new Date(b.start+'T00:00:00')) + '-с эхэлсэн</div>' +
+          '</div>' +
+          '<span class="status-pill ' + (isDone ? 'done' : 'active') + '">' + (isDone ? 'Дууссан' : 'Идэвхтэй') + '</span>' +
+        '</div>' +
+        '<div class="borrower-stats">' +
+          '<div class="item"><div class="label">Зээлийн дүн</div><div class="value">' + fmt(b.principal) + '</div></div>' +
+          '<div class="item"><div class="label">Хүү / Хугацаа</div><div class="value">' + b.rate + '% · ' + b.term + ' сар</div></div>' +
+          '<div class="item"><div class="label">Сарын төлбөр</div><div class="value">' + fmt(calc.monthly) + '</div></div>' +
+          '<div class="item"><div class="label">Үлдэгдэл</div><div class="value">' + fmt(remaining) + '</div></div>' +
+        '</div>' +
+        '<div class="progress-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="meta" style="margin-bottom:12px;">' + paid + ' / ' + b.term + ' төлбөр хийгдсэн (' + pct + '%)</div>' +
+        '<div class="borrower-actions">' +
+          (isDone ? '' : '<button class="btn small mark-paid" data-id="' + b.id + '">Төлбөр хийсэн тэмдэглэх</button>') +
+          '<button class="btn danger del-borrower" data-id="' + b.id + '">Устгах</button>' +
+        '</div>';
+      list.appendChild(div);
+    });
+
+    document.getElementById('sum-active').textContent = activeCount;
+    document.getElementById('sum-principal').textContent = fmt(totalPrincipal);
+    document.getElementById('sum-remaining').textContent = fmt(totalRemaining);
+
+    list.querySelectorAll('.mark-paid').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.id;
+        var b = borrowers.find(function(x){ return x.id === id; });
+        if(b && b.paidCount < b.term){
+          var oldCount = b.paidCount;
+          var newCount = oldCount + 1;
+          updateBorrowerRecord(id, { paidCount: newCount });
+          addAuditEntry({ type:'payment', borrowerId: id, borrowerName: b.name, from: oldCount, to: newCount });
+        }
+      });
+    });
+    list.querySelectorAll('.del-borrower').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.id;
+        if(confirm('Энэ зээлдэгчийн бүртгэлийг устгах уу?')){
+          deleteBorrowerRecord(id);
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  initStorage();
+
+})();
+</script>
+</body>
+</html>
