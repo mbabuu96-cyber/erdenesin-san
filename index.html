@@ -462,16 +462,26 @@
           <input type="number" id="c-principal" inputmode="decimal" placeholder="10 000 000" min="0">
         </div>
         <div class="field">
-          <label for="c-rate">Жилийн хүү (%)</label>
-          <input type="number" id="c-rate" inputmode="decimal" placeholder="18" min="0" step="0.1">
-        </div>
-        <div class="field">
           <label for="c-term">Хугацаа (сараар)</label>
           <input type="number" id="c-term" inputmode="numeric" placeholder="24" min="1" step="1">
         </div>
         <div class="field">
+          <label for="c-rate">Хүү</label>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="c-rate" inputmode="decimal" placeholder="18" min="0" step="0.01" style="flex:1;">
+            <select id="c-rate-type" style="flex:0 0 auto; width:auto;">
+              <option value="annual">%/жил</option>
+              <option value="monthly">%/сар</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
           <label for="c-start">Эхлэх огноо</label>
           <input type="date" id="c-start">
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="c-fixed-payment">Сард төлөх тогтмол дүн (заавал биш — хоосон орхивол автоматаар бодогдоно)</label>
+          <input type="number" id="c-fixed-payment" inputmode="decimal" placeholder="жишээ нь 500 000" min="0">
         </div>
       </div>
       <div style="margin-top:18px;">
@@ -484,12 +494,28 @@
           <span class="value" id="r-monthly">—</span>
         </div>
         <div class="result-row">
+          <span class="label">— үүнээс үндсэн зээлийн төлөлт (1-р сар)</span>
+          <span class="value" id="r-first-principal">—</span>
+        </div>
+        <div class="result-row">
+          <span class="label">— үүнээс хүүгийн төлөлт (1-р сар)</span>
+          <span class="value" id="r-first-interest">—</span>
+        </div>
+        <div class="result-row">
           <span class="label">Нийт төлөх дүн</span>
           <span class="value" id="r-total">—</span>
         </div>
         <div class="result-row">
           <span class="label">Нийт хүү</span>
           <span class="value" id="r-interest">—</span>
+        </div>
+        <div class="result-row" id="r-actual-term-row" style="display:none;">
+          <span class="label">Бодит төлөгдөх хугацаа</span>
+          <span class="value" id="r-actual-term">—</span>
+        </div>
+
+        <div id="calc-warning" class="alert-box" style="display:none; margin-top:14px;">
+          <div><div class="alert-title">Тооцоолол боломжгүй</div><div id="calc-warning-text"></div></div>
         </div>
 
         <details id="schedule-details">
@@ -555,19 +581,29 @@
           <input type="number" id="b-principal" min="0" required>
         </div>
         <div class="field">
-          <label for="b-rate">Жилийн хүү (%)</label>
-          <input type="number" id="b-rate" min="0" step="0.1" required>
-        </div>
-        <div class="field">
           <label for="b-term">Хугацаа (сараар)</label>
           <input type="number" id="b-term" min="1" step="1" required>
+        </div>
+        <div class="field">
+          <label for="b-rate">Хүү</label>
+          <div style="display:flex; gap:8px;">
+            <input type="number" id="b-rate" min="0" step="0.01" required style="flex:1;">
+            <select id="b-rate-type" style="flex:0 0 auto; width:auto;">
+              <option value="annual">%/жил</option>
+              <option value="monthly">%/сар</option>
+            </select>
+          </div>
         </div>
         <div class="field">
           <label for="b-start">Эхлэх огноо</label>
           <input type="date" id="b-start" required>
         </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="b-fixed-payment">Сард төлөх тогтмол дүн (заавал биш — хоосон орхивол автоматаар бодогдоно)</label>
+          <input type="number" id="b-fixed-payment" min="0" placeholder="жишээ нь 500 000">
+        </div>
       </div>
-      <p style="font-size:0.78rem; color:var(--color-text-dim); margin: 4px 0 0;">Хадгалсны дараа Нэр, Дүн, Хүү, Хугацаа, Эхлэх огноог засах боломжгүй болно — эдгээр нь түгжигдэнэ. Зөвхөн төлбөрийн явц (тэмдэглэх) болон устгах үйлдэл хийгдэнэ, бүгд түүхэнд бүртгэгдэнэ.</p>
+      <p style="font-size:0.78rem; color:var(--color-text-dim); margin: 4px 0 0;">Хадгалсны дараа Нэр, Дүн, Хүү, Хугацаа, Эхлэх огноо, Сарын тогтмол төлбөрийг засах боломжгүй болно — эдгээр нь түгжигдэнэ. Зөвхөн төлбөрийн явц (тэмдэглэх) болон устгах үйлдэл хийгдэнэ, бүгд түүхэнд бүртгэгдэнэ.</p>
       <div class="form-actions">
         <button type="submit" class="btn">Хадгалах</button>
         <button type="button" class="btn secondary" id="cancel-form-btn">Цуцлах</button>
@@ -623,41 +659,75 @@
     return d.toLocaleDateString('mn-MN', {year:'numeric', month:'2-digit', day:'2-digit'});
   }
 
-  function amortize(principal, annualRatePct, termMonths, startDate){
+  function amortize(principal, annualRatePct, termMonths, startDate, fixedPayment){
     var r = (annualRatePct/100)/12;
-    var n = termMonths;
-    var payment;
-    if(r === 0){
-      payment = principal / n;
-    } else {
-      payment = principal * r / (1 - Math.pow(1+r, -n));
-    }
     var rows = [];
     var balance = principal;
     var totalInterest = 0;
-    for(var i=1;i<=n;i++){
-      var interest = balance * r;
-      var principalPart = payment - interest;
-      if(i === n){ principalPart = balance; payment = principalPart + interest; }
-      balance = Math.max(0, balance - principalPart);
-      totalInterest += interest;
-      rows.push({
-        period: i,
-        date: startDate ? fmtDate(addMonths(startDate, i)) : '',
-        principalPart: principalPart,
-        interest: interest,
-        payment: principalPart + interest,
-        balance: balance
-      });
+    var negativeAmortization = false;
+    var payment;
+
+    if(fixedPayment && fixedPayment > 0){
+      // Custom fixed monthly payment: walk the schedule until the balance is paid off.
+      payment = fixedPayment;
+      var maxIterations = Math.max(termMonths * 4, 600);
+      var i = 1;
+      while(balance > 0.5 && i <= maxIterations){
+        var interest = balance * r;
+        var principalPart = payment - interest;
+        if(principalPart <= 0){
+          negativeAmortization = true;
+          break;
+        }
+        if(principalPart > balance){ principalPart = balance; }
+        balance = Math.max(0, balance - principalPart);
+        totalInterest += interest;
+        rows.push({
+          period: i,
+          date: startDate ? fmtDate(addMonths(startDate, i)) : '',
+          principalPart: principalPart,
+          interest: interest,
+          payment: principalPart + interest,
+          balance: balance
+        });
+        i++;
+      }
+    } else {
+      // Standard equal-payment (annuity) schedule.
+      var n = termMonths;
+      if(r === 0){
+        payment = principal / n;
+      } else {
+        payment = principal * r / (1 - Math.pow(1+r, -n));
+      }
+      for(var k=1;k<=n;k++){
+        var interestK = balance * r;
+        var principalPartK = payment - interestK;
+        if(k === n){ principalPartK = balance; payment = principalPartK + interestK; }
+        balance = Math.max(0, balance - principalPartK);
+        totalInterest += interestK;
+        rows.push({
+          period: k,
+          date: startDate ? fmtDate(addMonths(startDate, k)) : '',
+          principalPart: principalPartK,
+          interest: interestK,
+          payment: principalPartK + interestK,
+          balance: balance
+        });
+      }
+      payment = (r === 0) ? (principal / n) : (principal * r / (1 - Math.pow(1+r,-n)));
     }
-    var firstPayment = rows.length ? rows[0].payment : (r===0 ? principal/n : payment);
+
     return {
-      monthly: (r===0 ? principal/n : principal * r / (1 - Math.pow(1+r,-n))),
+      monthly: rows.length ? rows[0].payment : payment,
       rows: rows,
       totalInterest: totalInterest,
-      totalPaid: principal + totalInterest
+      totalPaid: principal + totalInterest,
+      negativeAmortization: negativeAmortization,
+      actualMonths: rows.length
     };
   }
+
 
   // ---------- tabs ----------
   var tabBtns = document.querySelectorAll('.tab-btn');
@@ -697,20 +767,49 @@
 
   document.getElementById('calc-btn').addEventListener('click', function(){
     var principal = parseFloat(document.getElementById('c-principal').value);
-    var rate = parseFloat(document.getElementById('c-rate').value);
+    var rateInput = parseFloat(document.getElementById('c-rate').value);
+    var rateType = document.getElementById('c-rate-type').value;
     var term = parseInt(document.getElementById('c-term').value, 10);
     var start = document.getElementById('c-start').value;
+    var fixedPayment = parseFloat(document.getElementById('c-fixed-payment').value);
+    if(isNaN(fixedPayment) || fixedPayment <= 0){ fixedPayment = null; }
 
-    if(!principal || principal <= 0 || isNaN(rate) || !term || term <= 0){
+    if(!principal || principal <= 0 || isNaN(rateInput) || !term || term <= 0){
       alert('Зээлийн дүн, хүү, хугацааг зөв бөглөнө үү.');
       return;
     }
 
-    var result = amortize(principal, rate, term, start);
+    var annualRate = rateType === 'monthly' ? rateInput * 12 : rateInput;
+    var result = amortize(principal, annualRate, term, start, fixedPayment);
+    var warnEl = document.getElementById('calc-warning');
+    var warnText = document.getElementById('calc-warning-text');
+
+    if(result.negativeAmortization){
+      warnText.textContent = 'Таны заасан сарын төлбөр (' + fmt(fixedPayment) + ') нь сар бүрийн хүүг ч бүрэн нөхөхгүй байна. Иймд зээл хэзээ ч барагдахгүй. Илүү өндөр дүн оруулна уу.';
+      warnEl.style.display = 'flex';
+    } else {
+      warnEl.style.display = 'none';
+    }
 
     document.getElementById('r-monthly').textContent = fmt(result.monthly);
     document.getElementById('r-total').textContent = fmt(result.totalPaid);
     document.getElementById('r-interest').textContent = fmt(result.totalInterest);
+
+    if(result.rows.length){
+      document.getElementById('r-first-principal').textContent = fmt(result.rows[0].principalPart);
+      document.getElementById('r-first-interest').textContent = fmt(result.rows[0].interest);
+    } else {
+      document.getElementById('r-first-principal').textContent = '—';
+      document.getElementById('r-first-interest').textContent = '—';
+    }
+
+    var actualTermRow = document.getElementById('r-actual-term-row');
+    if(fixedPayment && !result.negativeAmortization && result.actualMonths !== term){
+      document.getElementById('r-actual-term').textContent = result.actualMonths + ' сар (таны заасан ' + term + ' сартай харьцуулбал)';
+      actualTermRow.style.display = 'flex';
+    } else {
+      actualTermRow.style.display = 'none';
+    }
 
     var tbody = document.getElementById('schedule-body');
     tbody.innerHTML = '';
@@ -729,6 +828,7 @@
     document.getElementById('calc-results').classList.add('show');
   });
 
+
   // ---------- ledger (lending management) ----------
   var STORAGE_KEY = 'loan_app_borrowers_v1';
   var borrowers = [];
@@ -737,8 +837,8 @@
   var auditCol = null;
   var auditLog = [];
   var AUDIT_STORAGE_KEY = 'loan_app_audit_v1';
-  var LOCKED_FIELDS = ['name','phone','principal','rate','term','start'];
-  var FIELD_LABELS = { name:'Нэр', phone:'Утас', principal:'Зээлийн дүн', rate:'Хүү', term:'Хугацаа', start:'Эхлэх огноо' };
+  var LOCKED_FIELDS = ['name','phone','principal','rate','term','start','fixedPayment'];
+  var FIELD_LABELS = { name:'Нэр', phone:'Утас', principal:'Зээлийн дүн', rate:'Хүү', term:'Хугацаа', start:'Эхлэх огноо', fixedPayment:'Тогтмол сарын төлбөр' };
   var pendingRestore = {};
   var activeAlerts = [];
 
@@ -876,10 +976,11 @@
 
   function addBorrowerRecord(input){
     var locked = {};
-    LOCKED_FIELDS.forEach(function(f){ locked[f] = input[f]; });
+    LOCKED_FIELDS.forEach(function(f){ locked[f] = (input[f] === undefined ? null : input[f]); });
     var record = {
       name: input.name, phone: input.phone || '',
       principal: input.principal, rate: input.rate, term: input.term, start: input.start,
+      fixedPayment: input.fixedPayment || null,
       paidCount: 0,
       createdAt: new Date().toISOString(),
       locked: locked
@@ -1019,22 +1120,36 @@
     var name = document.getElementById('b-name').value.trim();
     var phone = document.getElementById('b-phone').value.trim();
     var principal = parseFloat(document.getElementById('b-principal').value);
-    var rate = parseFloat(document.getElementById('b-rate').value);
+    var rateInput = parseFloat(document.getElementById('b-rate').value);
+    var rateType = document.getElementById('b-rate-type').value;
     var term = parseInt(document.getElementById('b-term').value, 10);
     var start = document.getElementById('b-start').value;
+    var fixedPayment = parseFloat(document.getElementById('b-fixed-payment').value);
+    if(isNaN(fixedPayment) || fixedPayment <= 0){ fixedPayment = null; }
 
-    if(!name || !principal || principal<=0 || isNaN(rate) || !term || term<=0 || !start){
+    if(!name || !principal || principal<=0 || isNaN(rateInput) || !term || term<=0 || !start){
       alert('Бүх талбарыг зөв бөглөнө үү.');
       return;
+    }
+
+    var annualRate = rateType === 'monthly' ? rateInput * 12 : rateInput;
+
+    if(fixedPayment){
+      var testRun = amortize(principal, annualRate, term, start, fixedPayment);
+      if(testRun.negativeAmortization){
+        alert('Таны заасан сарын төлбөр нь сар бүрийн хүүг ч бүрэн нөхөхгүй байна. Илүү өндөр дүн оруулна уу.');
+        return;
+      }
     }
 
     addBorrowerRecord({
       name: name,
       phone: phone,
       principal: principal,
-      rate: rate,
+      rate: annualRate,
       term: term,
-      start: start
+      start: start,
+      fixedPayment: fixedPayment
     });
     form.reset();
     form.classList.remove('show');
@@ -1056,17 +1171,28 @@
     var totalRemaining = 0;
 
     borrowers.forEach(function(b){
-      var calc = amortize(b.principal, b.rate, b.term, b.start);
-      var paid = Math.min(b.paidCount, b.term);
-      var remaining = paid < b.term ? calc.rows[paid > 0 ? paid-1 : 0].balance : 0;
+      var calc = amortize(b.principal, b.rate, b.term, b.start, b.fixedPayment);
+      var effectiveTerm = calc.rows.length || b.term;
+      b._effectiveTerm = effectiveTerm;
+      var paid = Math.min(b.paidCount, effectiveTerm);
+      var remaining = paid < effectiveTerm ? calc.rows[paid > 0 ? paid-1 : 0].balance : 0;
       if(paid === 0){ remaining = b.principal; }
-      var isDone = paid >= b.term;
+      var isDone = paid >= effectiveTerm;
 
       if(!isDone) activeCount++;
       totalPrincipal += b.principal;
       totalRemaining += remaining;
 
-      var pct = Math.round((paid / b.term) * 100);
+      var pct = Math.round((paid / effectiveTerm) * 100);
+
+      var nextRow = calc.rows[paid]; // breakdown of the NEXT unpaid installment
+      var breakdownHtml = nextRow
+        ? '<div class="item"><div class="label">Дараагийн төлбөр — үндсэн / хүү</div><div class="value">' + fmtNum(nextRow.principalPart) + ' / ' + fmtNum(nextRow.interest) + '</div></div>'
+        : '<div class="item"><div class="label">Дараагийн төлбөр</div><div class="value">—</div></div>';
+
+      var rateLabel = b.fixedPayment
+        ? (b.rate + '%/жил · тогтмол ' + fmt(b.fixedPayment) + '/сар')
+        : (b.rate + '% · ' + b.term + ' сар');
 
       var div = document.createElement('div');
       div.className = 'borrower';
@@ -1080,12 +1206,13 @@
         '</div>' +
         '<div class="borrower-stats">' +
           '<div class="item"><div class="label">Зээлийн дүн</div><div class="value">' + fmt(b.principal) + '</div></div>' +
-          '<div class="item"><div class="label">Хүү / Хугацаа</div><div class="value">' + b.rate + '% · ' + b.term + ' сар</div></div>' +
+          '<div class="item"><div class="label">Хүү / Хугацаа</div><div class="value">' + rateLabel + '</div></div>' +
           '<div class="item"><div class="label">Сарын төлбөр</div><div class="value">' + fmt(calc.monthly) + '</div></div>' +
           '<div class="item"><div class="label">Үлдэгдэл</div><div class="value">' + fmt(remaining) + '</div></div>' +
+          breakdownHtml +
         '</div>' +
         '<div class="progress-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
-        '<div class="meta" style="margin-bottom:12px;">' + paid + ' / ' + b.term + ' төлбөр хийгдсэн (' + pct + '%)</div>' +
+        '<div class="meta" style="margin-bottom:12px;">' + paid + ' / ' + effectiveTerm + ' төлбөр хийгдсэн (' + pct + '%)</div>' +
         '<div class="borrower-actions">' +
           (isDone ? '' : '<button class="btn small mark-paid" data-id="' + b.id + '">Төлбөр хийсэн тэмдэглэх</button>') +
           '<button class="btn danger del-borrower" data-id="' + b.id + '">Устгах</button>' +
@@ -1101,7 +1228,8 @@
       btn.addEventListener('click', function(){
         var id = btn.dataset.id;
         var b = borrowers.find(function(x){ return x.id === id; });
-        if(b && b.paidCount < b.term){
+        var cap = (b && b._effectiveTerm) || (b && b.term);
+        if(b && b.paidCount < cap){
           var oldCount = b.paidCount;
           var newCount = oldCount + 1;
           updateBorrowerRecord(id, { paidCount: newCount });
